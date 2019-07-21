@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const multer = require('multer')
 const path = require('path')
+const fs = require('fs') //filesystem libary will delete covers of the book that are not needed in case of error
 const Book = require('../models/book')
 const uploadPath = path.join('public', Book.coverImageBasePath)   //coverImageBasePath comes from the model book.js
 const Author = require('../models/author')
@@ -43,9 +44,20 @@ router.post('/', upload.single('cover'), async (req, res) => {
     //res.redirect(`books/${newBook.id}`)
     res.redirect(`books`)
   } catch {
+    if (book.coverImageName != null) {
+      removeBookCover(book.coverImageName)
+    }
       renderNewPage(res, book, true)    // error creating new book
   }
 })
+
+//function remove bookcover which will be triggered if we have an error, for example if you do not fill the title section, book cover will not be stored since we do not need it
+
+function removeBookCover(fileName){
+  fs.unlink(path.join(uploadPath, fileName), err => {
+    if (err) console.error(err)
+  })
+}
 
 //function will render a new page if upload is successfull if not it will return error, it is used in both "create book" and "new book" logic
 async function renderNewPage(res, book, hasError = false ){
