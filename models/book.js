@@ -1,7 +1,6 @@
 //book schema, description, title pagecount etc all will be stored in the database, model for the book
 const mongoose = require('mongoose')
-const path = require('path')
-const coverImageBasePath = 'uploads/bookCovers'   //path to all stored book cover images it will be created by multer
+
 
 const bookSchema = new mongoose.Schema({
   title: {
@@ -24,7 +23,11 @@ const bookSchema = new mongoose.Schema({
     required: true,
     default: Date.now
   },
-  coverImageName: {
+  coverImage: {
+    type: Buffer,     //no longer string since we used filepond, buffer of the data representing the entire image
+    required: true
+  },
+  coverImageType: {
     type: String,
     required: true
   },
@@ -36,10 +39,9 @@ const bookSchema = new mongoose.Schema({
 })
 
 bookSchema.virtual('coverImagePath').get(function(){    //this virtual schema is used to display cover of the book in index.ejs(books) which is uploaded by the user
-  if (this.coverImageName != null){
-    return path.join('/', coverImageBasePath, this.coverImageName)
+  if (this.coverImage != null && this.coverImageType != null){                     //The function is never activated. That function always exists, and all it does is try to convert the cover image database information into a usable cover image. The function won't return anything though unless the cover image information is set on the database object.
+    return `data:${this.coverImageType};charset=utf-8;base64,${this.coverImage.toString('base64')}`  //converting into base64 data
   }
 })
 
 module.exports = mongoose.model('Book', bookSchema)
-module.exports.coverImageBasePath = coverImageBasePath    // exports to the server books.js so we can upload it and save it
