@@ -18,11 +18,21 @@ const upload = multer({
 
 //all Books, search for the books menu
 router.get('/', async (req, res) => {
+  let query = Book.find()   //searching for the model of the book
+  if(req.query.title != null && req.query.title != ''){
+    query = query.regex('title', new RegExp(req.query.title, 'i'))     //regular expression to find title of the book, executed if you click search books
+  }
+  if(req.query.publishedBefore != null && req.query.publishedBefore != ''){
+    query = query.lte('publishDate', req.query.publishedBefore)    // lte= less than or equal, query for the published date which will return object publishDate
+  }
+  if(req.query.publishedAfter != null && req.query.publishedAfter != ''){
+    query = query.gte('publishDate', req.query.publishedAfter)     // gte= greater than or equal, query for the published date which will return object publishDate
+  }
   try {
-    const books = await Book.find({})
-    res.render('books/index',{
-      books:books,
-      searchOptions: req.query
+    const books = await query.exec()
+    res.render('books/index',{     // rendering content into index.ejs if successfull
+      books:books,  //displays books covers check index.ejs
+      searchOptions: req.query // check index.ejs used to display book queries, title, date, pagecount etc
     })
   } catch {
     res.redirect('/')

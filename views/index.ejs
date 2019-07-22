@@ -1,1 +1,6 @@
-Middle
+<h2>Recently added</h2>   <!--homepage-->
+<div>
+  <% books.forEach(book => { %>
+    <img height="150" width="100" src="<%= book.coverImagePath %>" >    <!--recently added books top 10 check index.js route-->
+  <% }) %>
+</div>

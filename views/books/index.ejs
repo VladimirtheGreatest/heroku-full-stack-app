@@ -2,7 +2,7 @@
 <form action="/books" method="GET">
   <div>
     <label>Title</label>
-    <input type="text" name="title" value="<%= searchOptions.title %>">
+    <input type="text" name="title" value="<%= searchOptions.title %>">  <!--check routes/books.js searching for the book-->
   </div>
   <div>
     <label>Published After</label>
@@ -14,7 +14,7 @@
   </div>
   <button type="submit">Search</button>
 </form>
-<div>
+<div><!--displaying recently added books-->
   <% books.forEach(book => { %>
     <img height="150" width="100" src="<%= book.coverImagePath %>" >
   <% }) %>
