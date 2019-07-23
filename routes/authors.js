@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const Author = require('../models/author')
+const Book = require('../models/book')
 
 
 //all authors searching for authors already added
@@ -37,8 +38,7 @@ router.post('/', async (req, res) => {
   })
   try {
     const newAuthor = await author.save()
-    //res.redirect(`authors/${newAuthor.id}`)
-    res.redirect(`authors`)
+    res.redirect(`authors/${newAuthor.id}`)
   } catch {
     res.render('authors/new', {
       author: author,
@@ -49,13 +49,24 @@ router.post('/', async (req, res) => {
 
 //show, edit, update, delete operations, need library method override in order to use put and delete from the browser
 
-router.get('/:id', (req,res) => {
-  res.send('Show Author' + req.params.id)
+
+//show author and his books
+router.get('/:id', async (req, res) => {
+  try {
+  const author = await Author.findById(req.params.id)
+  const books = await Book.find({ author: author.id }).limit(6).exec()   //show only 6 books
+  res.render('authors/show', {
+    author: author,
+    booksByAuthor: books
+  })
+} catch {
+  res.redirect('/')
+}
 })
 
 
 //edit authors
-router.get('/:id/edit', async (req,res) => {
+router.get('/:id/edit', async (req, res) => {
   try {
     const author = await Author.findById(req.params.id)
     res.render('authors/edit', {
@@ -67,12 +78,39 @@ router.get('/:id/edit', async (req,res) => {
 })
 
 //update authors
-router.put('/:id', (req,res) => {
-  res.send('Update Author' + req.params.id)
+router.put('/:id', async (req, res) => {
+  let author  //we must define it outside of the scope try catch in order to use it
+  try {
+    author = await Author.findById(req.params.id)
+    author.name = req.body.name   //updaeting the author name, check author/formfields.js authorname is an input
+    await author.save()
+    res.redirect(`/authors/${author.id}`) //string interpolation
+  } catch {
+    if (author == null) {   //error if we cant find author in the database
+      res.redirect('/')
+    } else {
+      res.render('authors/edit', {
+        author: author,
+        errorMessage: 'Error updating Author'  //error if trying to update an author with empty field input
+      })
+    }
+  }
 })
 
-router.delete('/:id', (req,res) => {
-  res.send('Delete Author' + req.params.id)
+//delete author
+router.delete('/:id', async (req, res) => {
+  let author
+  try {
+    author = await Author.findById(req.params.id)
+    await author.remove()
+    res.redirect('/authors')
+  } catch {
+    if (author == null) {
+      res.redirect('/')
+    } else {
+      res.redirect(`/authors/${author.id}`)
+    }
+  }
 })
 
 

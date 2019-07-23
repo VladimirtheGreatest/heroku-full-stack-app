@@ -32,7 +32,7 @@ const bookSchema = new mongoose.Schema({
     required: true
   },
   author: {
-    type: mongoose.Schema.Types.ObjectId, //Author.js referencing
+    type: mongoose.Schema.Types.ObjectId, //Author.js referencing, this is very important this id will connect author with the book so we can display all books from the particular author
     required: true,
     ref: 'Author'
   }
