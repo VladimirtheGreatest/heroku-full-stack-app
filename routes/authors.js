@@ -1,3 +1,4 @@
+//controller
 const express = require('express')
 const router = express.Router()
 const Author = require('../models/author')
@@ -46,6 +47,33 @@ router.post('/', async (req, res) => {
   }
 })
 
+//show, edit, update, delete operations, need library method override in order to use put and delete from the browser
+
+router.get('/:id', (req,res) => {
+  res.send('Show Author' + req.params.id)
+})
+
+
+//edit authors
+router.get('/:id/edit', async (req,res) => {
+  try {
+    const author = await Author.findById(req.params.id)
+    res.render('authors/edit', {
+      author: author
+    })
+  } catch {
+    res.redirect('/authors')
+  }
+})
+
+//update authors
+router.put('/:id', (req,res) => {
+  res.send('Update Author' + req.params.id)
+})
+
+router.delete('/:id', (req,res) => {
+  res.send('Delete Author' + req.params.id)
+})
 
 
 module.exports = router
