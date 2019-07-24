@@ -1,3 +1,4 @@
+// books controller
 const express = require('express')
 const router = express.Router()
 const Book = require('../models/book')
@@ -46,23 +47,105 @@ router.post('/', async (req, res) => {
   saveCover(book, req.body.cover)
   try {
     const newBook = await book.save()  //add the book to the database + save the image to the folder
-    //res.redirect(`books/${newBook.id}`)
-    res.redirect(`books`)
+    res.redirect(`books/${newBook.id}`)
   } catch {
       renderNewPage(res, book, true)    // error creating new book
   }
 })
 
+
+//show book
+router.get('/:id', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).populate('author').exec()  //in order to get information about author such as name etc not only id we need to use function populate
+    res.render('books/show', { book:book })
+  } catch {
+    res.redirect('/')
+  }
+})
+
+
+// Edit Book Route
+router.get('/:id/edit', async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id)
+    renderEditPage(res, book)
+  } catch {
+    res.redirect('/')
+  }
+})
+
+//update book
+
+router.put('/:id', async (req, res) => {
+  let book
+
+  try {
+    book = await Book.findById(req.params.id)
+    book.title = req.body.title
+    book.author = req.body.author
+    book.publishDate = new Date(req.body.publishDate)
+    book.pageCount = req.body.pageCount
+    book.description = req.body.description
+    if (req.body.cover != null && req.body.cover !== '') {
+      saveCover(book, req.body.cover)
+    }
+    await book.save()
+    res.redirect(`/books/${book.id}`)
+  } catch {
+    if (book != null) {
+      renderEditPage(res, book, true)
+    } else {
+      redirect('/')
+    }
+  }
+})
+
+// Delete Book Page
+router.delete('/:id', async (req, res) => {
+  let book
+  try {
+    book = await Book.findById(req.params.id)
+    await book.remove()
+    res.redirect('/books')
+  } catch {
+    if (book != null) {
+      res.render('books/show', {
+        book: book,
+        errorMessage: 'Could not remove book'
+      })
+    } else {
+      res.redirect('/')
+    }
+  }
+})
+
 //function will render a new page if upload is successfull if not it will return error, it is used in both "create book" and "new book" logic
 async function renderNewPage(res, book, hasError = false ){
+  renderFormPage(res, book, 'new', hasError = false)
+}
+
+//function will render a edit page, used in edit book route above
+async function renderEditPage(res, book, hasError = false ){
+  renderFormPage(res, book, 'edit', hasError = false)
+}
+
+//renderFormPage code for both edit and new books, the only difference between them is form paramater which will be rendered after successful upload
+async function renderFormPage(res, book, form, hasError = false ){
   try {
     const authors = await Author.find({})
     const params = {
       authors: authors,
       book: book
     }
-    if (hasError) params.errorMessage = 'Error creating new Book'
-    res.render('books/new', params)
+    if (hasError) {
+      if (form === 'edit') {
+        params.errorMessage = 'Error Updating Book'
+      } else {
+        params.errorMessage = 'Error Creating Book'
+      }
+    }
+    res.render(`books/${form}`, params)
   } catch {
     res.redirect('/books')  //in case of an error redirecting back to the books section
   }

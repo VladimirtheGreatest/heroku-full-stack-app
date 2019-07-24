@@ -10,7 +10,7 @@ const bodyParser = require('body-parser')
 const methodOverride = require('method-override') //allows us to use put and delete, check authors.js
 
 
-//routes
+//routes "controllers"
 const indexRouter = require('./routes/index')    //access to the index.js file "router"
 const authorRouter = require('./routes/authors')  //access to the authors.js file "router"
 const bookRouter = require('./routes/books')  //access to the books.js file "router"
