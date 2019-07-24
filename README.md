@@ -7,5 +7,5 @@ https://fullstackvladimir.herokuapp.com/
 
 
 This application runs on Node.js, Express, and MongoDB.
-During this course I learned how the backend works. I learned how to create my own backend and how to connect my server to the database(Mongo Atlas Cluster.
+During this course I learned how the backend works. I learned how to create my own backend and how to connect my server to the database(Mongo Atlas Cluster).
 I learned how to deploy a web application to heroku as well. 
